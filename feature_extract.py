@@ -6,6 +6,9 @@ import soundfile as sf
 import os
 import numpy as np
 
+from warnings import simplefilter
+simplefilter(action='ignore', category=FutureWarning)
+
 
 def peakDetection(audio, fs):
     # 50Hz filter
@@ -79,7 +82,7 @@ class featureExtract(object):
 
             # Mel spectrum
             elif self.feature == 'mel':
-                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40,)
+                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
                 wave_spectrum.append(mel_spect)
         # wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
