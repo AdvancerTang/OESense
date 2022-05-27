@@ -41,6 +41,14 @@ def peakDetection(audio, fs):
     return audio_pitch
 
 
+def norm(data):
+    min_val = data.min(axis=0)
+    max_val = data.max(axis=0)
+
+    norm_data = (data - min_val) / (max_val - min_val)
+    return norm_data
+
+
 def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
     all_wave_path = []
     for i in data_path:
@@ -67,6 +75,7 @@ def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
     for wav_idx in range(len(all_wave_path)):
         line = all_wave_path[wav_idx]
         wave, fs = sf.read(line)
+        wave = norm(wave)
         audio_pitch_0 = peakDetection(wave[:, 0], fs)
         audio_pitch_1 = peakDetection(wave[:, 1], fs)
         audio_pitch_2 = peakDetection(wave, fs)
@@ -142,7 +151,7 @@ def dataset_cut(scp_path, wave_dir, channel,  val_rate):
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    data_path = [os.path.join(data_root, 'S4_Ges_*.wav')]
+    data_path = [os.path.join(data_root, 'S1_Ges_*.wav')]
     find_wave(data_path, data_root, 'scp_dir', 'total')
     scp_path_0 = r"F:\OESense\scp_dir\wave_cut_0.scp"
     dataset_cut(scp_path_0, 'wave_dir', 0, val_rate=0.1)
