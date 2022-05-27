@@ -67,16 +67,14 @@ class stft_featureExtract(object):
     def forward(self, x):
         peakWave = self.peakDetection(x, self.fs)
         wave_spectrum = []
-        # if self.channel == 2:
-        #     for wave in peakWave:
-        #         audio_stft_l = librosa.stft(wave[:, 0], n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
-        #         audio_stft_r = librosa.stft(wave[:, 1], n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
-        #         audio_stft = np.concatenate((audio_stft_l, audio_stft_r), axis=0)
-        #         wave_spectrum.append(np.abs(audio_stft))
-        # else:
+
         for wave in peakWave:
+            # STFT
             audio_stft = librosa.stft(wave, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
             wave_spectrum.append(np.abs(audio_stft))
+
+            # Mel spectrum
+
         # wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
 

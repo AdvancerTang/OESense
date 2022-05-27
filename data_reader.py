@@ -62,6 +62,8 @@ class myDataset(Dataset):
         # audio_pitch_channel = (audio_name.split('.')[0]).split('-')[-2]
         total_audio_path = audio_path.split('-')[0] + '.wav'
         wave, fs = sf.read(total_audio_path)
+        wave = self.norm(wave)
+
 
         # if self.channel == audio_pitch_channel == 0:
         if self.channel == 0:
@@ -90,6 +92,12 @@ class myDataset(Dataset):
 
         return selected_wave, label
 
+    def norm(self, data):
+        min_val = data.min(axis=0)
+        max_val = data.max(axis=0)
+
+        norm_data = (data - min_val) / (max_val - min_val)
+        return norm_data
 
 def time_CollateFn(sample_batch):
     sample_batch = sorted(sample_batch, key=lambda x: x[0].shape[0], reverse=True)
