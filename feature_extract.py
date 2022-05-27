@@ -32,7 +32,9 @@ def peakDetection(audio, fs):
     pitch = int(len(audio) / period)
     for i in range(pitch):
         idx = period * i + np.argmax(filtered_envelop[i * period: (i + 1) * period])
-        if idx not in peak_posotion:
+        begin = idx - 0.25 * fs
+        end = idx + 0.15 * fs
+        if begin > 0 and end < len(filtered_audio):
             peak_posotion.append(idx)
             peak_value.append(filtered_envelop[idx])
             audio_pitch.append(filtered_audio[int(idx - 0.25 * fs): int(idx + 0.15 * fs)])
@@ -57,12 +59,13 @@ def peakDetection(audio, fs):
     # return peak_posotion, peak_value
     return audio_pitch
 
-class stft_featureExtract(object):
-    def __init__(self, peakDetection=None, n_fft=256, hop_length=40, fs=4000):
+class featureExtract(object):
+    def __init__(self, peakDetection=None, feature=None, n_fft=256, hop_length=40, fs=4000):
         self.n_fft = n_fft
         self.hop_length = hop_length
         self.fs = fs
         self.peakDetection = peakDetection
+        self.feature = feature
 
     def forward(self, x):
         peakWave = self.peakDetection(x, self.fs)
@@ -70,11 +73,14 @@ class stft_featureExtract(object):
 
         for wave in peakWave:
             # STFT
-            audio_stft = librosa.stft(wave, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
-            wave_spectrum.append(np.abs(audio_stft))
+            if self.feature == 'stft':
+                audio_stft = librosa.stft(wave, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
+                wave_spectrum.append(np.abs(audio_stft))
 
             # Mel spectrum
-
+            elif self.feature == 'mel':
+                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40,)
+                wave_spectrum.append(mel_spect)
         # wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
 
@@ -106,10 +112,11 @@ if __name__ == '__main__':
     audio_pitch = peakDetection(channel_l, fs)
     audio_pitch = np.array(audio_pitch)
     # print(audio_pitch.shape)
-    # feature = time_featureExtract(peakDetection)
-    # wave_spectrum = feature.forward(channel_l)
-    # wave_spectrum = np.array(wave_spectrum)
-    # print(wave_spectrum.shape)
+    feature = time_featureExtract(peakDetection)
+    feature = featureExtract(peakDetection, 'mel')
+    wave_spectrum = feature.forward(channel_l)
+    wave_spectrum = np.array(wave_spectrum)
+    print(wave_spectrum.shape)
 
     audio_stft = librosa.stft(audio_pitch[1], n_fft=512, hop_length=40, window='hamming')
     XdB = librosa.amplitude_to_db(np.abs(audio_stft), ref=np.max, amin=0.001, top_db=120)

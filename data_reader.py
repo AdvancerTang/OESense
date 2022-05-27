@@ -1,6 +1,6 @@
 import os.path
 import torch
-from feature_extract import stft_featureExtract as featureExtract
+from feature_extract import  featureExtract
 # from feature_extract import time_featureExtract as featureExtract
 from torch.utils.data import Dataset, DataLoader
 import scipy.signal as signal
@@ -42,13 +42,14 @@ def peakDetection(audio, fs):
 
 
 class myDataset(Dataset):
-    def __init__(self, scp_path, channel):
+    def __init__(self, scp_path, channel, feature):
         self.scp_path = scp_path
         self.channel = channel
+        self.feature = feature
         with open(self.scp_path) as f:
             lines = f.readlines()
         self.files_scp = [line.strip() for line in lines]
-        self.FeaExt = featureExtract(peakDetection)
+        self.FeaExt = featureExtract(peakDetection, self.feature)
 
     def __len__(self):
         return len(self.files_scp)
@@ -124,6 +125,6 @@ class myDataloader(DataLoader):
 
 
 if __name__ == '__main__':
-    scp_path = r"F:\OESense\scp_dir\cheek.scp"
+    scp_path = r"F:\OESense\wave_dir\data_train_0"
     channel = 2
-    dtst = myDataset(scp_path, channel)
+    dtst = myDataset(scp_path, channel, 'mel')
