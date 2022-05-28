@@ -151,7 +151,7 @@ def dataset_cut(scp_path, wave_dir, channel,  val_rate):
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    data_path = [os.path.join(data_root, 'S1_Ges_*.wav')]
+    data_path = [os.path.join(data_root, 'S5_Ges_*.wav')]
     find_wave(data_path, data_root, 'scp_dir', 'total')
     scp_path_0 = r"F:\OESense\scp_dir\wave_cut_0.scp"
     dataset_cut(scp_path_0, 'wave_dir', 0, val_rate=0.1)

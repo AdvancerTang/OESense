@@ -82,7 +82,9 @@ class featureExtract(object):
 
             # Mel spectrum
             elif self.feature == 'mel':
-                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
+                # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
+                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft,
+                                                           hop_length=self.hop_length)
                 wave_spectrum.append(mel_spect)
         # wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum

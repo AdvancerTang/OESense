@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class FreqNet(nn.Module):
-    def __init__(self):
+    def __init__(self, label):
         super(FreqNet, self).__init__()
         # time feature extract
         self.t_encoder = nn.ModuleList()
@@ -41,7 +41,7 @@ class FreqNet(nn.Module):
         self.fc0 = nn.Linear(256, 128)
         self.fc1 = nn.Linear(128, 64)
         # self.dropout = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(64, 12)
+        self.fc2 = nn.Linear(64, label)
 
     def forward(self, input):
         # shape: [B, C, F, T]
