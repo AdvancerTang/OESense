@@ -11,7 +11,8 @@ import argparse
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Adam
 from model.mel_net import MelNet
-from model.net import FreqNet
+# from model.net import FreqNet
+from model.rnn_net import FreqNet
 
 from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
@@ -113,6 +114,8 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
 
 
                 pre = nn.Softmax(dim=1)
+
+
                 y_pre = pre(y_pre_evl)
                 y_pre = y_pre.argmax(dim=1)
                 yPre.append(int((y_pre).numpy()))
@@ -129,12 +132,11 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
         recall = result['recall']
         print('recall = {:.3f}'.format(recall))
         writer.add_scalar('recall', recall, iter_)
-        if cur_recall <= recall:
-            torch.save(model.state_dict(), os.path.join(model_path, '{}_{}.model'.format('FreqNet', iter_)))
-            cur_recall = recall
-            max_recall = max(max_recall, cur_recall)
-            if max_recall == cur_recall:
-                max_iter = iter_
+        torch.save(model.state_dict(), os.path.join(model_path, '{}_{}.model'.format('FreqNet', iter_)))
+        cur_recall = recall
+        max_recall = max(max_recall, cur_recall)
+        if max_recall == cur_recall:
+            max_iter = iter_
     writer.close()
     return max_recall, max_iter
 
@@ -169,6 +171,7 @@ def main(args):
     print('-{} training batch, {} training batch'.format(len(dataloader_train), len(dataloader_val)))
 
     # train
+
     if feature == 'time':
         time_frature_train(dataloader_train, dataloader_val, iters)
     elif feature == 'stft' or feature == 'mel':
@@ -183,7 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
     parser.add_argument('--batchsize_train', default=16, type=int)
     parser.add_argument('--batchsize_val', default=1, type=int)
-    parser.add_argument('--iters', default=50, type=int)
+    parser.add_argument('--iters', default=30, type=int)
     parser.add_argument('--lr', default=0.0001, type=float)
     parser.add_argument('--device', default='cpu', type=str)
     args = parser.parse_args()
