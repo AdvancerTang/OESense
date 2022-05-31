@@ -21,7 +21,8 @@ class FreqNet(nn.Module):
         super(FreqNet, self).__init__()
         # freq feature extract
         self.encoder = nn.ModuleList()
-        self.conv1 = nn.Sequential(nn.Conv2d(129, 256, kernel_size=(1, 3), stride=(1, 2)),
+        self.conv1 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=(1, 3), stride=(1, 2)),  # stft input = 129,
+                                   # mel input = 128
                                    nn.BatchNorm2d(256),
                                    nn.LeakyReLU(inplace=True)
                                    )

@@ -3,9 +3,10 @@ import os.path
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 import numpy as np
+import soundfile
 import soundfile as sf
 import random
-
+import math
 random.seed(1)
 
 def peakDetection(audio, fs):
@@ -38,18 +39,46 @@ def peakDetection(audio, fs):
             peak_value.append(filtered_envelop[idx])
             audio_pitch.append(filtered_audio[int(idx - 0.25 * fs): int(idx + 0.15 * fs)])
 
+    plt.figure(1)
+    ax1 = plt.subplot(411)
+    plt.plot(audio[:fs])
+    plt.title('original signal ')
+    ax2 = plt.subplot(412)
+    plt.plot(filtered_audio[:fs])
+    plt.title('50Hz filter ')
+    ax3 = plt.subplot(413)
+    plt.plot(high_envelop_audio[:fs])
+    plt.title('high envelop ')
+    ax4 = plt.subplot(414)
+    plt.plot(filtered_envelop[:fs])
+    plt.title('5Hz filter ')
+    plt.xlabel('time')
+    plt.ylabel('mag')
+    plt.tight_layout()
+
     return audio_pitch
+
+def add_noise(data, snr):
+    P_clean = np.sum(abs(data) ** 2) / len(data)
+    noise = np.random.randn(len(data))
+    P_noise = np.sum(abs(noise) ** 2) / len(data)
+    noise_variance = P_clean / (math.pow(10., (snr / 10)))
+    add_noise = np.sqrt(noise_variance/P_noise) * noise
+    noise_ = np.transpose(np.tile(add_noise, (2, 1)))
+    noisy = data + noise_
+    return noisy
 
 
 def norm(data):
     min_val = data.min(axis=0)
     max_val = data.max(axis=0)
 
+    data = add_noise(data, 5)
     norm_data = (data - min_val) / (max_val - min_val)
     return norm_data
 
 
-def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
+def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
     all_wave_path = []
     for i in data_path:
         all_wave_path += glob.glob(i)
@@ -58,18 +87,6 @@ def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
     waves_0 = ['' for _ in range(1)]
     waves_1 = ['' for _ in range(1)]
     waves_2 = ['' for _ in range(1)]
-    # for wav_idx in range(len(all_wave_path)):
-    #     line = all_wave_path[wav_idx]
-    #     wave, fs = sf.read(line)
-    #     for j in range(2):
-    #         audio_pitch = peakDetection(wave[:, j], fs)
-    #         for i in range(len(audio_pitch)):
-    #             wave_name = os.path.basename(line).replace('.wav', '-{}-{}.wav'.format(j, i))
-    #             wave_name = os.path.join(data_root, wave_name)
-    #             wave_name += '\n'
-    #             waves[0] += wave_name
-    #     line += '\n'
-    #     lines[0] += line
 
     # don't select channel
     for wav_idx in range(len(all_wave_path)):
@@ -80,15 +97,15 @@ def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
         audio_pitch_1 = peakDetection(wave[:, 1], fs)
         audio_pitch_2 = peakDetection(wave, fs)
         for i in range(len(audio_pitch_0)):
-            # wave_name = os.path.basename(line).replace('.wav', '-{}-{}.wav'.format(j, i))
-            wave_name = os.path.basename(line).replace('.wav', '-{}.wav'.format(i))
-            wave_name = os.path.join(data_root, wave_name)
+            wave_name = os.path.basename(line).replace('.wav', '-0-{}.wav'.format(i))
+            soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
+            wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             waves_0[0] += wave_name
         for i in range(len(audio_pitch_1)):
-            # wave_name = os.path.basename(line).replace('.wav', '-{}-{}.wav'.format(j, i))
-            wave_name = os.path.basename(line).replace('.wav', '-{}.wav'.format(i))
-            wave_name = os.path.join(data_root, wave_name)
+            wave_name = os.path.basename(line).replace('.wav', '-1-{}.wav'.format(i))
+            soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_1[i], fs)
+            wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             waves_1[0] += wave_name
         for i in range(len(audio_pitch_2)):
@@ -107,9 +124,8 @@ def find_wave(data_path, data_root, scp_dir, scp_name='wave_total'):
         f.write(lines[0])
 
     # cut wave
-    with open(os.path.join(scp_dir, 'wave_cut_0.scp'), 'w') as f:
-        f.write(waves_0[0])
     with open(os.path.join(scp_dir, 'wave_cut_1.scp'), 'w') as f:
+        f.write(waves_0[0])
         f.write(waves_1[0])
     with open(os.path.join(scp_dir, 'wave_cut_2.scp'), 'w') as f:
         f.write(waves_2[0])
@@ -151,11 +167,13 @@ def dataset_cut(scp_path, wave_dir, channel,  val_rate):
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    data_path = [os.path.join(data_root, 'S5_Ges_*.wav')]
-    find_wave(data_path, data_root, 'scp_dir', 'total')
-    scp_path_0 = r"F:\OESense\scp_dir\wave_cut_0.scp"
-    dataset_cut(scp_path_0, 'wave_dir', 0, val_rate=0.1)
+    data_path = [os.path.join(data_root, 'S1_Ges_*.wav')]
+    noise_path = r"F:\OESense\data\noise wave"
+    find_wave(data_path, data_root, 'scp_dir', noise_path, 'total')
+    # scp_path_0 = r"F:\OESense\scp_dir\wave_cut_0.scp"
+    # dataset_cut(scp_path_0, 'wave_dir', 0, val_rate=0.1)
     scp_path_1 = r"F:\OESense\scp_dir\wave_cut_1.scp"
-    dataset_cut(scp_path_1, 'wave_dir', 1, val_rate=0.1)
+    dataset_cut(scp_path_1, 'wave_dir', 1, val_rate=0.2)
     scp_path_2 = r"F:\OESense\scp_dir\wave_cut_2.scp"
-    dataset_cut(scp_path_2, 'wave_dir', 2, val_rate=0.1)
+    dataset_cut(scp_path_2, 'wave_dir', 2, val_rate=0.2)
+

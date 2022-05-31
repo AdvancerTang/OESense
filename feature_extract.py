@@ -42,51 +42,27 @@ def peakDetection(audio, fs):
             peak_value.append(filtered_envelop[idx])
             audio_pitch.append(filtered_audio[int(idx - 0.25 * fs): int(idx + 0.15 * fs)])
 
-    plt.figure(1)
-    ax1 = plt.subplot(411)
-    plt.plot(audio[:fs])
-    plt.title('original signal ')
-    ax2 = plt.subplot(412)
-    plt.plot(filtered_audio[:fs])
-    plt.title('50Hz filter ')
-    ax3 = plt.subplot(413)
-    plt.plot(high_envelop_audio[:fs])
-    plt.title('high envelop ')
-    ax4 = plt.subplot(414)
-    plt.plot(filtered_envelop[:fs])
-    plt.title('5Hz filter ')
-    plt.xlabel('time')
-    plt.ylabel('mag')
-    plt.tight_layout()
-
     # return peak_posotion, peak_value
     return audio_pitch
 
 class featureExtract(object):
-    def __init__(self, peakDetection=None, feature=None, n_fft=256, hop_length=40, fs=4000):
+    def __init__(self, feature=None, n_fft=256, hop_length=40, fs=4000):
         self.n_fft = n_fft
         self.hop_length = hop_length
         self.fs = fs
-        self.peakDetection = peakDetection
         self.feature = feature
 
     def forward(self, x):
-        peakWave = self.peakDetection(x, self.fs)
-        wave_spectrum = []
+        # STFT
+        if self.feature == 'stft':
+            wave_spectrum = librosa.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
 
-        for wave in peakWave:
-            # STFT
-            if self.feature == 'stft':
-                audio_stft = librosa.stft(wave, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
-                wave_spectrum.append(np.abs(audio_stft))
-
-            # Mel spectrum
-            elif self.feature == 'mel':
-                # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
-                mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft,
-                                                           hop_length=self.hop_length)
-                wave_spectrum.append(mel_spect)
-        # wave_spectrum = np.array(wave_spectrum)
+        # Mel spectrum
+        elif self.feature == 'mel':
+            # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
+            wave_spectrum = librosa.feature.melspectrogram(x, sr=self.fs, n_fft=self.n_fft,
+                                                       hop_length=self.hop_length)
+        wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
 
 class time_featureExtract(object):

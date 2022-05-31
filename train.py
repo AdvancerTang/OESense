@@ -7,6 +7,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 import numpy as np
 import argparse
+import random
+random.seed(1)
 
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Adam
@@ -62,11 +64,11 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
 
 
     criterion = nn.CrossEntropyLoss()
-    if feature == 'stft':
-        model = FreqNet(label)
-    elif feature == 'mel':
-        model = MelNet()
-    # model = FreqNet(label)
+    # if feature == 'stft':
+    #     model = FreqNet(label)
+    # elif feature == 'mel':
+    #     model = MelNet()
+    model = FreqNet(label)
     optimizer = Adam(model.parameters(), lr=lr)
     model = model.to(device)
 
@@ -85,6 +87,8 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
             optimizer.zero_grad()
             y_pre_tr = model(feature_tr)
             label_tr = label_tr.squeeze(-1)
+            if y_pre_tr.ndim == 1:
+                y_pre_tr = y_pre_tr.unsqueeze(0)
             loss = criterion(y_pre_tr, label_tr)
             loss.backward()
             optimizer.step()
@@ -110,16 +114,17 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
                 y_pre_evl = model(feature_evl)
                 y_pre_evl = y_pre_evl.unsqueeze(0)
                 label_evl = label_evl.squeeze(-1)
+                if y_pre_evl.ndim == 1:
+                    y_pre_evl = y_pre_evl.unsqueeze(0)
                 loss_evl = criterion(y_pre_evl, label_evl)
 
-
                 pre = nn.Softmax(dim=1)
-
-
                 y_pre = pre(y_pre_evl)
                 y_pre = y_pre.argmax(dim=1)
                 yPre.append(int((y_pre).numpy()))
                 yLabel.append(int((label_evl).numpy()))
+                # yPre.append((y_pre).numpy())
+                # yLabel.append((label_evl).numpy())
                 evl_loss_total += loss_evl.item()
             print('Iteration:{0}, loss = {1:.6f} '.format(iter_, evl_loss_total / numBatch_evl))
             writer.add_scalar('eval_loss', evl_loss_total / numBatch_evl, iter_)
@@ -153,8 +158,8 @@ def main(args):
     lr = args.lr
 
     # file path
-    train_path = r'F:\OESense\wave_dir\data_train_0'
-    val_path = r'F:\OESense\wave_dir\data_val_0'
+    train_path = r'F:\OESense\wave_dir\data_train_1'
+    val_path = r'F:\OESense\wave_dir\data_val_1'
 
     # define dataloader
     print('loading the dataset...')
@@ -181,13 +186,14 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--feature', default='stft', type=str, help='choose time, stft, mel')
+    parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--label', default=12, type=int, help='number of gestures')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
     parser.add_argument('--batchsize_train', default=16, type=int)
     parser.add_argument('--batchsize_val', default=1, type=int)
-    parser.add_argument('--iters', default=30, type=int)
+    parser.add_argument('--iters', default=25, type=int)
     parser.add_argument('--lr', default=0.0001, type=float)
     parser.add_argument('--device', default='cpu', type=str)
     args = parser.parse_args()
     main(args)
+6
