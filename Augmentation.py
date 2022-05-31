@@ -6,6 +6,14 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import math
+import os
+
+def add_bg(wave, bg, weight):
+    n = len(wave)
+    start = np.random.randint(len(bg) - n)
+    bg_slice = bg[start: start + n]
+    wav_with_bg = wave * np.random.uniform(0.8, 1.2) + bg_slice * np.random.uniform(0, weight)
+    return wav_with_bg
 
 
 def add_noise(data, snr):
@@ -28,10 +36,22 @@ if __name__ == '__main__':
     librosa.display.specshow(clean, x_axis='time', y_axis='hz', sr=fs, hop_length=40, cmap='gnuplot2')
     plt.colorbar()
 
+    # add noise
     noisy = add_noise(wave, 5)
-    noise_stft = librosa.stft(noisy, n_fft=256, hop_length=40, window='hamming')
-    noisy = librosa.amplitude_to_db(np.abs(noise_stft), ref=np.max, amin=0.001, top_db=120)
+    noise_stft = librosa.stft(noisy[:, 0], n_fft=256, hop_length=40, window='hamming')
+    noisy_ = librosa.amplitude_to_db(np.abs(noise_stft), ref=np.max, amin=0.001, top_db=120)
     plt.figure(2)
-    librosa.display.specshow(noisy, x_axis='time', y_axis='hz', sr=fs, hop_length=40, cmap='gnuplot2')
+    librosa.display.specshow(noisy_, x_axis='time', y_axis='hz', sr=fs, hop_length=40, cmap='gnuplot2')
+    plt.colorbar()
+
+    # add chew bg
+    chew_path = r"F:\OESense\data\Activity Recognition\S1_Act_Drink.wav"
+    chew, fs = sf.read(chew_path)
+    wave_addChew = add_bg(noisy[:, 0], chew[:, 0], 0.1)
+    sf.write(os.path.join(r"F:\OESense\data", 'dirty_wave.wav'), wave_addChew, fs)
+    plt.figure(3)
+    chew_stft = librosa.stft(wave_addChew, n_fft=256, hop_length=40, window='hamming')
+    chew_ = librosa.amplitude_to_db(np.abs(chew_stft), ref=np.max, amin=0.001, top_db=120)
+    librosa.display.specshow(chew_, x_axis='time', y_axis='hz', sr=fs)
     plt.colorbar()
     plt.show()

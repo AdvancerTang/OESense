@@ -108,7 +108,7 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
 
     # add Drink noise
 
-    drink_path = r"F:\OESense\data\Activity Recognition\S1_Act_Chew.wav"
+    drink_path = r"F:\OESense\data\Activity Recognition\S1_Act_Drink.wav"
     drink, fs = sf.read(drink_path)
     drink_0 = ['' for _ in range(1)]
     drink_1 = ['' for _ in range(1)]
@@ -124,21 +124,41 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
         audio_pitch_0 = peakDetection(wave[:, 0], fs)
         audio_pitch_1 = peakDetection(wave[:, 1], fs)
         audio_pitch_2 = peakDetection(wave, fs)
+
+        # label sum
+        c0 = [1, 4, 6, 8]
+        c1 = [3, 5, 7, 9]
+        c2 = [10, 11, 12]
+        c3 = [2]
+        base_name = os.path.basename(line)
+        wave_name = base_name.split('.')[0]
+        label = wave_name.split('_')[-1]
+        label = int(label)
+        if label in c0:
+            base_name = 'S1_Ges_1.wav'
+        elif label in c1:
+            base_name = 'S1_Ges_2.wav'
+        elif label in c2:
+            base_name = 'S1_Ges_3.wav'
+        elif label in c3:
+            base_name = 'S1_Ges_4.wav'
         for i in range(len(audio_pitch_0)):
-            wave_name = os.path.basename(line).replace('.wav', '-0-{}.wav'.format(i))
+            # wave_name = os.path.basename(line).replace('.wav', '-0-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-0-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             waves_0[0] += wave_name
         for i in range(len(audio_pitch_1)):
-            wave_name = os.path.basename(line).replace('.wav', '-1-{}.wav'.format(i))
+            # wave_name = os.path.basename(line).replace('.wav', '-1-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-1-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_1[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             waves_1[0] += wave_name
         for i in range(len(audio_pitch_2)):
             # wave_name = os.path.basename(line).replace('.wav', '-{}-{}.wav'.format(j, i))
-            wave_name = os.path.basename(line).replace('.wav', '-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-{}.wav'.format(i))
             wave_name = os.path.join(data_root, wave_name)
             wave_name += '\n'
             waves_2[0] += wave_name
@@ -149,13 +169,13 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
         chew_pitch_0 = peakDetection(wave_chew_0, fs)
         chew_pitch_1 = peakDetection(wave_chew_1, fs)
         for i in range(len(chew_pitch_0)):
-            wave_name = os.path.basename(line).replace('.wav', '-0-c-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-0-c-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             chew_0[0] += wave_name
         for i in range(len(chew_pitch_1)):
-            wave_name = os.path.basename(line).replace('.wav', '-1-c-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-1-c-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_1[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
@@ -167,13 +187,13 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
         drink_pitch_0 = peakDetection(wave_drink_0, fs)
         drink_pitch_1 = peakDetection(wave_drink_1, fs)
         for i in range(len(drink_pitch_0)):
-            wave_name = os.path.basename(line).replace('.wav', '-0-d-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-0-d-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             drink_0[0] += wave_name
         for i in range(len(drink_pitch_1)):
-            wave_name = os.path.basename(line).replace('.wav', '-1-d-{}.wav'.format(i))
+            wave_name = base_name.replace('.wav', '-1-d-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_1[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'

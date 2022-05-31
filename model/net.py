@@ -15,14 +15,13 @@ class FreqNet(nn.Module):
                                    nn.BatchNorm2d(128),
                                    nn.LeakyReLU(inplace=True)
                                    )
-        self.conv3 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=(1, 3), stride=(1, 2)),
-                                   nn.BatchNorm2d(256),
-                                   nn.LeakyReLU(inplace=True)
-                                   )
+        # self.conv3 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=(1, 3), stride=(1, 2)),
+        #                            nn.BatchNorm2d(256),
+        #                            nn.LeakyReLU(inplace=True)
+        #                            )
         self.t_encoder = nn.Sequential(
                 self.conv1,
-                self.conv2,
-                self.conv3
+                self.conv2
             )
 
         # stft feature extract
@@ -38,7 +37,7 @@ class FreqNet(nn.Module):
             self.conv1f,
             self.conv2f
         )
-        self.fc0 = nn.Linear(256, 128)
+        # self.fc0 = nn.Linear(256, 128)
         self.fc1 = nn.Linear(128, 64)
         # self.dropout = nn.Dropout(0.5)
         self.fc2 = nn.Linear(64, label)
@@ -57,7 +56,7 @@ class FreqNet(nn.Module):
 
         # shape: [B, T, F]
         cnn_out = cnn_out.mean(1)
-        cnn_out = self.fc0(cnn_out)
+        # cnn_out = self.fc0(cnn_out)
         cnn_out = self.fc1(cnn_out)
         # cnn_out = self.dropout(cnn_out)
         cnn_out = self.fc2(cnn_out)

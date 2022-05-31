@@ -54,14 +54,15 @@ class featureExtract(object):
 
     def forward(self, x):
         # STFT
+        wave_spectrum = 0
         if self.feature == 'stft':
             wave_spectrum = librosa.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window='hamming')
 
         # Mel spectrum
         elif self.feature == 'mel':
-            # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=40)
-            wave_spectrum = librosa.feature.melspectrogram(x, sr=self.fs, n_fft=self.n_fft,
-                                                       hop_length=self.hop_length)
+            # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft,
+            # hop_length=self.hop_length, n_mels=40)
+            wave_spectrum = librosa.feature.melspectrogram(x, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length)
         wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
 
@@ -85,25 +86,35 @@ class time_featureExtract(object):
         return waves
 
 if __name__ == '__main__':
-    data_path = r"F:\OESense\data\Gesture Recognition"
-    data_name = 'S10_Ges_1.wav'
+    data_path = r"F:\OESense\data\Person1"
+    data_name = 'S1_Ges_1-0-0.wav'
     audio, fs = sf.read(os.path.join(data_path, data_name))
-    channel_l = audio[:, 0]
-    channel_r = audio[:, 1]
-    audio_pitch = peakDetection(channel_l, fs)
-    audio_pitch = np.array(audio_pitch)
+    plt.figure(1)
+    plt.plot(audio)
+    plt.title('original signal ')
+    # channel_l = audio[:, 0]
+    # channel_r = audio[:, 1]
+    # audio_pitch = peakDetection(channel_l, fs)
+    # audio_pitch = np.array(audio_pitch)
     # print(audio_pitch.shape)
-    feature = time_featureExtract(peakDetection)
-    feature = featureExtract(peakDetection, 'mel')
-    wave_spectrum = feature.forward(channel_l)
-    wave_spectrum = np.array(wave_spectrum)
-    print(wave_spectrum.shape)
+    # feature = time_featureExtract(peakDetection)
+    feature = featureExtract('mel')
+    spectrum = feature.forward(audio)
+    mel_spectrum = np.array(spectrum)
+    print(mel_spectrum.shape)
 
-    audio_stft = librosa.stft(audio_pitch[1], n_fft=512, hop_length=40, window='hamming')
+    audio_stft = librosa.stft(audio, n_fft=512, hop_length=40, window='hamming')
     XdB = librosa.amplitude_to_db(np.abs(audio_stft), ref=np.max, amin=0.001, top_db=120)
     plt.figure(2)
     librosa.display.specshow(XdB, x_axis='time', y_axis='hz', sr=fs, hop_length=40, cmap='gnuplot2')
     plt.colorbar()
+    plt.title('stft')
+    plt.figure(3)
+    mel_spect = librosa.amplitude_to_db(np.abs(mel_spectrum), ref=np.max)
+    librosa.display.specshow(mel_spect, sr=fs, x_axis='time', y_axis='mel')
+    # plt.ylim(0, 20)
+    plt.colorbar()
+    plt.title('mel')
     plt.show()
 
 

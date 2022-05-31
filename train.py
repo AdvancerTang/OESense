@@ -136,6 +136,7 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, device, feat
         result = res['macro avg']
         recall = result['recall']
         print('recall = {:.3f}'.format(recall))
+        print(result)
         writer.add_scalar('recall', recall, iter_)
         torch.save(model.state_dict(), os.path.join(model_path, '{}_{}.model'.format('FreqNet', iter_)))
         cur_recall = recall
@@ -189,11 +190,10 @@ if __name__ == '__main__':
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--label', default=12, type=int, help='number of gestures')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
-    parser.add_argument('--batchsize_train', default=16, type=int)
+    parser.add_argument('--batchsize_train', default=4, type=int)
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
     parser.add_argument('--lr', default=0.0001, type=float)
     parser.add_argument('--device', default='cpu', type=str)
     args = parser.parse_args()
     main(args)
-6
