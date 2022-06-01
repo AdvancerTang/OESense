@@ -9,22 +9,24 @@ import argparse
 
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Adam
-from model.net import FreqNet
-
+from model.rnn_net import FreqNet
 
 def main(args):
     # Compile and configure parameters.
+    person = args.person
     channel = args.channel
+    label = args.label
+    feature = args.feature
     batchsize_val = args.batchsize_val
     trained_model = args.trained_model
 
 
     # file path
-    val_path = r'F:\OESense\wave_dir\data_val_0'
+    val_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
 
     # define dataloader
     print('loading the dataset...')
-    dataset_val = myDataset(val_path, channel)
+    dataset_val = myDataset(val_path, channel, feature)
     dataloader_val = myDataloader(dataset=dataset_val,
                                   batch_size=batchsize_val,
                                   shuffle=False)
@@ -33,7 +35,7 @@ def main(args):
     print('{} training batch'.format(len(dataloader_val)))
 
     # define the load model
-    model = FreqNet()
+    model = FreqNet(label)
     model_dict = model.state_dict()
     pretrained_dict = torch.load(trained_model)
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -49,6 +51,8 @@ def main(args):
             y_Pre = model(feature)
             y_pre_evl = y_Pre.unsqueeze(0)
             label_evl = label.squeeze(-1)
+            if y_pre_evl.ndim == 1:
+                y_pre_evl = y_pre_evl.unsqueeze(0)
             pre = nn.Softmax(dim=1)
             y_pre = pre(y_pre_evl)
             y_pre = y_pre.argmax(dim=1)
@@ -66,9 +70,12 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--channel', default=2, type=int, help='choose channel')
+    parser.add_argument('--person', default=10, type=int, help='choose test person')
+    parser.add_argument('--channel', default=0, type=int, help='choose channel')
+    parser.add_argument('--label', default=12, type=int, help='number of gestures')
+    parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
-    parser.add_argument('--trained_model', default='./audio_model/FreqNet_11.model', type=str)
+    parser.add_argument('--trained_model', default='./audio_model/FreqNet_16.model', type=str)
     args = parser.parse_args()
     main(args)

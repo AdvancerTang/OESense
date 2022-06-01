@@ -89,7 +89,7 @@ def add_bg(wave, bg, weight):
     return wav_with_bg
 
 
-def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
+def find_wave(data_path, data_root, scp_dir, noise_path, person,  scp_name='wave_total'):
     all_wave_path = []
     for i in data_path:
         all_wave_path += glob.glob(i)
@@ -100,7 +100,7 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
     waves_2 = ['' for _ in range(1)]
 
     # add chew noise
-    chew_path = r"F:\OESense\data\Activity Recognition\S1_Act_Chew.wav"
+    chew_path = r"F:\OESense\data\Activity Recognition\S{}_Act_Chew.wav".format(person)
     chew, fs = sf.read(chew_path)
     chew_0 = ['' for _ in range(1)]
     chew_1 = ['' for _ in range(1)]
@@ -108,7 +108,7 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
 
     # add Drink noise
 
-    drink_path = r"F:\OESense\data\Activity Recognition\S1_Act_Drink.wav"
+    drink_path = r"F:\OESense\data\Activity Recognition\S{}_Act_Drink.wav".format(person)
     drink, fs = sf.read(drink_path)
     drink_0 = ['' for _ in range(1)]
     drink_1 = ['' for _ in range(1)]
@@ -134,23 +134,23 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
         wave_name = base_name.split('.')[0]
         label = wave_name.split('_')[-1]
         label = int(label)
+        # person_rawLabel_newLabel
         if label in c0:
-            base_name = 'S1_Ges_1.wav'
+            base_name = 'S{}_Ges_{}_1.wav'.format(person, label)
         elif label in c1:
-            base_name = 'S1_Ges_2.wav'
+            base_name = 'S{}_Ges_{}_2.wav'.format(person, label)
         elif label in c2:
-            base_name = 'S1_Ges_3.wav'
+            base_name = 'S{}_Ges_{}_3.wav'.format(person, label)
         elif label in c3:
-            base_name = 'S1_Ges_4.wav'
+            base_name = 'S{}_Ges_{}_4.wav'.format(person, label)
         for i in range(len(audio_pitch_0)):
-            # wave_name = os.path.basename(line).replace('.wav', '-0-{}.wav'.format(i))
+            # person_rawLabel_newLabel-Channel-pitchNum
             wave_name = base_name.replace('.wav', '-0-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
             wave_name += '\n'
             waves_0[0] += wave_name
         for i in range(len(audio_pitch_1)):
-            # wave_name = os.path.basename(line).replace('.wav', '-1-{}.wav'.format(i))
             wave_name = base_name.replace('.wav', '-1-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_1[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
@@ -169,6 +169,7 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
         chew_pitch_0 = peakDetection(wave_chew_0, fs)
         chew_pitch_1 = peakDetection(wave_chew_1, fs)
         for i in range(len(chew_pitch_0)):
+            # person_rawLabel_newLabel - Channel - Noise - pitchNum
             wave_name = base_name.replace('.wav', '-0-c-{}.wav'.format(i))
             soundfile.write(os.path.join(noise_path, wave_name), audio_pitch_0[i], fs)
             wave_name = os.path.join(noise_path, wave_name)
@@ -222,7 +223,7 @@ def find_wave(data_path, data_root, scp_dir, noise_path, scp_name='wave_total'):
     return None
 
 
-def dataset_cut(scp_path, wave_dir, channel, val_rate):
+def dataset_cut(scp_path, wave_dir, channel, val_rate, person):
     with open(scp_path) as f:
         lines = f.readlines()
     files_scp = [line.strip() for line in lines]
@@ -247,21 +248,23 @@ def dataset_cut(scp_path, wave_dir, channel, val_rate):
 
     if not os.path.exists(wave_dir):
         os.mkdir(wave_dir)
-    with open(os.path.join(wave_dir, 'data_train_{}'.format(channel)), 'w') as f:
+    with open(os.path.join(wave_dir, 'data_{}_train_{}'.format(person, channel)), 'w') as f:
         f.write(path_tr[0])
-    with open(os.path.join(wave_dir, 'data_val_{}'.format(channel)), 'w') as f:
+    with open(os.path.join(wave_dir, 'data_{}_val_{}'.format(person, channel)), 'w') as f:
         f.write(path_vl[0])
     return None
 
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    data_path = [os.path.join(data_root, 'S1_Ges_*.wav')]
-    noise_path = r"F:\OESense\data\Person1"
-    find_wave(data_path, data_root, 'scp_dir', noise_path, 'total')
+    person = 10
+    data_path = [os.path.join(data_root, 'S{}_Ges_*.wav'.format(person))]
+
+    noise_path = r"F:\OESense\data\Person{}".format(person)
+    find_wave(data_path, data_root, 'scp_dir', noise_path, person, 'total')
     # scp_path_0 = r"F:\OESense\scp_dir\wave_cut_0.scp"
     # dataset_cut(scp_path_0, 'wave_dir', 0, val_rate=0.1)
     scp_path_1 = r"F:\OESense\scp_dir\wave_cut_1.scp"
-    dataset_cut(scp_path_1, 'wave_dir', 1, val_rate=0.2)
+    dataset_cut(scp_path_1, 'wave_dir', 1, val_rate=0.2, person=person)
     scp_path_2 = r"F:\OESense\scp_dir\wave_cut_2.scp"
-    dataset_cut(scp_path_2, 'wave_dir', 2, val_rate=0.2)
+    dataset_cut(scp_path_2, 'wave_dir', 2, val_rate=0.2, person=person)
