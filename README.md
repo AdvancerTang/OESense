@@ -16,6 +16,6 @@ The tested feature include time frequency, STFT spectrum(129), mel spectrogram(1
 ## Data
 Compared with two channel feature, singal channel of channel[0] is better,we use the data of channel[0] and channel[1] to enlarge the dataset.
 
-Data name: S[Personn]_Ges_[origin label]_[new label]-[Channel]-[Noise type]-[pitch num]  exp:S10_Ges_1_1-1-c-9.wav
+Data name: S_[Personn]_Ges_[origin label]_[new label]-[Channel]-[Noise type]-[pitch num]  exp:S10_Ges_1_1-1-c-9.wav
 
 [paper](https://www.researchgate.net/publication/352713439_OESense_employing_occlusion_effect_for_in-ear_human_sensing)
