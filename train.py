@@ -160,6 +160,8 @@ def main(args):
     lr = args.lr
 
     # file path
+    # train_path = r'F:\OESense\wave_dir\data_train_1'
+    # val_path = r'F:\OESense\wave_dir\data_val_1'
     train_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
     val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
 
@@ -190,9 +192,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--person', default=1, type=int, help='train for person')
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
-    parser.add_argument('--label', default=12, type=int, help='number of gestures')
+    parser.add_argument('--label', default=4, type=int, help='number of gestures')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
-    parser.add_argument('--batchsize_train', default=4, type=int)
+    parser.add_argument('--batchsize_train', default=16, type=int)
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
     parser.add_argument('--lr', default=0.0001, type=float)
