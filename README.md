@@ -1,13 +1,13 @@
 # OESense
 The class is simplified as 4class:
 
-class1 including[left forehead/left temple/left cheek/left jaw];  
+  class1 including[left forehead/left temple/left cheek/left jaw];  
 
-class2 including[right forehead/right temple/right cheek/right jaw];
+  class2 including[right forehead/right temple/right cheek/right jaw];
 
-class3 including[nose/ philtrum/ chin];
+  class3 including[nose/ philtrum/ chin];
 
-class4 including[middle forehead].
+  class4 including[middle forehead].
 
 The tested feature include time frequency, STFT spectrum(129), mel spectrogram(128), currentl, mel is the best
 
