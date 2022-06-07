@@ -12,9 +12,8 @@ random.seed(1)
 
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Adam
-from model.mel_net import MelNet
-# from model.net import FreqNet
-from model.rnn_net import FreqNet
+# from model.rnn_net import FreqNet
+from model.total_net import FreqNet
 
 from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
@@ -158,12 +157,17 @@ def main(args):
     batchsize_val = args.batchsize_val
     iters = args.iters
     lr = args.lr
+    mode = args.mode
 
     # file path
     # train_path = r'F:\OESense\wave_dir\data_train_1'
     # val_path = r'F:\OESense\wave_dir\data_val_1'
-    train_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
-    val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
+    if mode == 'solo':
+        train_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
+        val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
+    elif mode == 'total':
+        train_path = r'F:\OESense\total_dir\total_data_train'
+        val_path = r'F:\OESense\total_dir\total_data_val'
 
     # define dataloader
     print('loading the dataset...')
@@ -190,7 +194,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--person', default=1, type=int, help='train for person')
+    parser.add_argument('--mode', default='total', type=str, help='total/solo')
+    parser.add_argument('--person', default=4, type=int, help='train for person')
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--label', default=4, type=int, help='number of gestures')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')

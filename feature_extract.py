@@ -63,6 +63,11 @@ class featureExtract(object):
             # mel_spect = librosa.feature.melspectrogram(wave, sr=self.fs, n_fft=self.n_fft,
             # hop_length=self.hop_length, n_mels=40)
             wave_spectrum = librosa.feature.melspectrogram(x, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length)
+
+        elif self.feature == 'time':
+            waves = librosa.feature.melspectrogram(x, sr=self.fs, n_fft=self.n_fft, hop_length=self.hop_length)
+            wave_spectrum = waves.flatten()
+
         wave_spectrum = np.array(wave_spectrum)
         return wave_spectrum
 

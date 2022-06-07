@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
     # add noise
     noisy = add_noise(wave, 5)
+    sf.write(os.path.join(r"F:\OESense\data", 'noise_wave.wav'), noisy, fs)
     noise_stft = librosa.stft(noisy[:, 0], n_fft=256, hop_length=40, window='hamming')
     noisy_ = librosa.amplitude_to_db(np.abs(noise_stft), ref=np.max, amin=0.001, top_db=120)
     plt.figure(2)
@@ -47,8 +48,8 @@ if __name__ == '__main__':
     # add chew bg
     chew_path = r"F:\OESense\data\Activity Recognition\S1_Act_Drink.wav"
     chew, fs = sf.read(chew_path)
-    wave_addChew = add_bg(noisy[:, 0], chew[:, 0], 0.1)
-    sf.write(os.path.join(r"F:\OESense\data", 'dirty_wave.wav'), wave_addChew, fs)
+    wave_addChew = add_bg(noisy[:, 0], chew[:, 0], 0.01)
+    sf.write(os.path.join(r"F:\OESense\data", 'drink_wave.wav'), wave_addChew, fs)
     plt.figure(3)
     chew_stft = librosa.stft(wave_addChew, n_fft=256, hop_length=40, window='hamming')
     chew_ = librosa.amplitude_to_db(np.abs(chew_stft), ref=np.max, amin=0.001, top_db=120)
