@@ -60,15 +60,14 @@ class FreqNet(nn.Module):
                                     nn.BatchNorm2d(256),
                                     nn.LeakyReLU(inplace=True)
                                     )
-        self.conv4f = nn.Sequential(nn.Conv2d(256, 512, kernel_size=(5, 3), stride=(1, 1), padding=(2, 1)),
-                                    nn.BatchNorm2d(512),
-                                    nn.LeakyReLU(inplace=True)
-                                    )
+        # self.conv4f = nn.Sequential(nn.Conv2d(256, 512, kernel_size=(5, 3), stride=(1, 1), padding=(2, 1)),
+        #                             nn.BatchNorm2d(512),
+        #                             nn.LeakyReLU(inplace=True)
+        #                             )
         self.f_encoder = nn.Sequential(
             self.conv1f,
             self.conv2f,
-            self.conv3f,
-            self.conv4f
+            self.conv3f
         )
         # self.fc0 = nn.Linear(256, 128)
         self.fc1 = nn.Linear(64, 32)

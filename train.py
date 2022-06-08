@@ -195,7 +195,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', default='total', type=str, help='total/solo')
-    parser.add_argument('--person', default=4, type=int, help='train for person')
+    parser.add_argument('--person', default=4, type=int, help='train for person. if mode is total, ignore')
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--label', default=4, type=int, help='number of gestures')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')

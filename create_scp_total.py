@@ -28,6 +28,6 @@ def total_data(persons, total_wav_dir, data_name):
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    persons = [1, 4, 10]
+    persons = [3, 4, 5, 7, 10]
     total_data(persons, 'total_dir', 'train')
     total_data(persons, 'total_dir', 'val')

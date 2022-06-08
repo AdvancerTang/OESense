@@ -276,7 +276,7 @@ def dataset_cut(scp_path, wave_dir, channel, val_rate, person):
 
 if __name__ == '__main__':
     data_root = r'F:\OESense\data\Gesture Recognition'
-    person = 5
+    person = 3
     data_path = [os.path.join(data_root, 'S{}_Ges_*.wav'.format(person))]
     noise_path = r"F:\OESense\data\Person{}".format(person)
     find_wave(data_path, data_root, 'scp_dir', noise_path, person, 'total')
