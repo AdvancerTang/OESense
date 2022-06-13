@@ -9,8 +9,8 @@ import argparse
 
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import Adam
-# from model.rnn_net import FreqNet
-from model.total_net import FreqNet
+from model.rnn_net import FreqNet
+# from model.total_net import FreqNet
 def main(args):
     # Compile and configure parameters.
     person = args.person
@@ -23,7 +23,7 @@ def main(args):
 
     # file path
     val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
-
+    # val_path = r'F:\OESense\total_dir\data_val_2'
     # define dataloader
     print('loading the dataset...')
     dataset_val = myDataset(val_path, channel, feature)
@@ -70,12 +70,12 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--person', default=10, type=int, help='choose test person')
+    parser.add_argument('--person', default=4, type=int, help='choose test person')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
     parser.add_argument('--label', default=4, type=int, help='number of gestures')
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
-    parser.add_argument('--trained_model', default='./good_model/total_17.model', type=str)
+    parser.add_argument('--trained_model', default='./audio_model/FreqNet_17.model', type=str)
     args = parser.parse_args()
     main(args)
