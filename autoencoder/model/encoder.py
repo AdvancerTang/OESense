@@ -1,112 +1,120 @@
 import torch
 import torch.nn as nn
 from torchvision import models
+import torch.nn.functional as F
 
-
-class GRU_Encoder(nn.Module):
-    def __init__(self, feature_dim, hidden_size, num_layers):
-        super(GRU_Encoder, self).__init__()
-        self.feature_dim = feature_dim
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.stack_rnn = nn.GRU(input_size=self.feature_dim, hidden_size=self.hidden_size, num_layers=self.num_layers,
-                                bidirectional=True)
-
-    def forward(self, input):
-        rnn_out, _ = self.stack_rnn(input)
-        return rnn_out
-
-
-class FreqNet(nn.Module):
-    def __init__(self, label):
-        super(FreqNet, self).__init__()
-        # freq feature extract
-        self.encoder = nn.ModuleList()
-        self.conv1 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=(1, 3), stride=(1, 2)),  # stft input = 129,
+class AutoEncoder(nn.Module):
+    def __init__(self, mode, label):
+        super(AutoEncoder, self).__init__()
+        # encoder
+        self.conv1 = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3, 3), stride=(2, 2)),  # stft input = 129,
                                    # mel input = 128
-                                   nn.BatchNorm2d(256),
+                                   nn.BatchNorm2d(32),
                                    nn.LeakyReLU(inplace=True)
                                    )
-        self.conv2 = nn.Sequential(nn.Conv2d(256, 512, kernel_size=(1, 3), stride=(1, 2)),
-                                   nn.BatchNorm2d(512),
+        self.conv2 = nn.Sequential(nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2)),
+                                   nn.BatchNorm2d(64),
+                                   nn.LeakyReLU(inplace=True)
+                                   )
+        self.conv3 = nn.Sequential(nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2)),
+                                   nn.BatchNorm2d(128),
                                    nn.LeakyReLU(inplace=True)
                                    )
 
-        self.encoder = nn.Sequential(
-            self.conv1,
-            self.conv2
-        )
-        # time feature extract
-        self.t_encoder = GRU_Encoder(512, 256, 1)
-        self.ln = nn.LayerNorm(512)
-
-        # stft feature extract
-        self.conv1f = nn.Sequential(nn.Conv2d(1, 64, kernel_size=(5, 5), stride=(2, 1), padding=(2, 2)),
+        # decoder
+        self.conv1f = nn.Sequential(nn.ConvTranspose2d(128, 64, kernel_size=(3, 3), stride=(2, 2)),
                                     nn.BatchNorm2d(64),
                                     nn.LeakyReLU(inplace=True)
                                     )
-        self.conv2f = nn.Sequential(nn.Conv2d(64, 128, kernel_size=(5, 3), stride=(2, 1), padding=(2, 2)),
-                                    nn.BatchNorm2d(128),
+        self.conv2f = nn.Sequential(nn.ConvTranspose2d(64, 32, kernel_size=(3, 3), stride=(2, 2)),
+                                    nn.BatchNorm2d(32),
                                     nn.LeakyReLU(inplace=True)
                                     )
-        self.f_encoder = nn.Sequential(
-            self.conv1f,
-            self.conv2f
+        self.conv3f = nn.Sequential(nn.ConvTranspose2d(32, 1, kernel_size=(3, 3), stride=(2, 2)),
+                                    nn.BatchNorm2d(1),
+                                    nn.LeakyReLU(inplace=True)
+                                    )
+
+        # self.stack_rnn = nn.GRU(input_size=15, hidden_size=15, num_layers=1,
+        #                         bidirectional=True)
+        # self.ln = nn.LayerNorm(30)
+
+        self.fc_f1 = nn.Sequential(
+            nn.Linear(15, 8),
+            nn.LeakyReLU(inplace=True)
         )
-        # self.fc0 = nn.Linear(256, 128)
-        self.fc1 = nn.Linear(128, 64)
-        # self.dropout = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(64, label)
+        self.fc_f2 = nn.Sequential(
+            nn.Linear(8, 4),
+            nn.LeakyReLU(inplace=True)
+        )
+        self.fc_f3 = nn.Sequential(
+            nn.Linear(8, 4),
+            nn.LeakyReLU(inplace=True)
+        )
+        # self.fc_t1 = nn.Sequential(
+        #     nn.Linear(4, 8),
+        #     nn.LeakyReLU(inplace=True)
+        # )
+        # self.fc_t2 = nn.Sequential(
+        #     nn.Linear(8, label),
+        #     nn.LeakyReLU(inplace=True)
+        # )
+
+
+        self.mode = mode
 
     def forward(self, input):
         # shape: [B, C, F, T]
         input = input.unsqueeze(1)
 
-        # shape: [B, F, C, T] freq feature extract
-        input = input.permute(0, 2, 1, 3)
-        extract = self.encoder(input)
+        # encode
+        encoded = self.conv1(input)
+        encoded = self.conv2(encoded)
+        encoded = self.conv3(encoded)
+        if self.mode == 'encode':
+            # decode
+            decoded = self.conv1f(encoded)
+            decoded = self.conv2f(decoded)
+            decoded = F.pad(decoded, (0, 1, 0, 0))
+            decoded = self.conv3f(decoded)
+            decoded = F.pad(decoded, (0, 0, 0, 1))
+            decoded = decoded.squeeze()
+            return decoded
+        elif self.mode == 'my':
+            # C * F * T
+            cnn_out = encoded.mean(1)
+            # C * T * F
+            cnn_out = cnn_out.permute(0, 2, 1)
 
-        # shape: [B, F, C, T] time feature extract
-        T_input = extract.squeeze(2)
-        # shape [T, B, F]
-        T_input = T_input.permute(2, 0, 1)
-        T_output = self.t_encoder(T_input)
-        rnn_out = self.ln(T_output)
-        # shape [B, C, F, T]
-        rnn_out = rnn_out.permute(1, 2, 0)
-        rnn_out = rnn_out.unsqueeze(1)
-
-        # shape: [B, T, F]
-        cnn_out = self.f_encoder(rnn_out)
-        cnn_out = cnn_out.mean(1)
-        cnn_out = cnn_out.permute(0, 2, 1)
-        # cnn_out = self.fc0(cnn_out)
-        cnn_out = self.fc1(cnn_out)
-        # cnn_out = self.dropout(cnn_out)
-        cnn_out = self.fc2(cnn_out)
-
-        max_pool = nn.MaxPool2d(kernel_size=(cnn_out.shape[1], 1))
-        cnn_out = max_pool(cnn_out)
-        cnn_out = cnn_out.squeeze()
-        return cnn_out
+            # t_out, _ = self.stack_rnn(cnn_out)
+            # t_out = self.ln(t_out)
+            t_out = self.fc_f1(cnn_out)
+            t_out = self.fc_f2(t_out)
+            # t_out = self.fc_f3(t_out)
+            f_out = t_out.permute(0, 2, 1)
+            # f_out = self.fc_t1(f_out)
+            # f_out = self.fc_t2(f_out)
+            max_pool = nn.MaxPool2d(kernel_size=(f_out.shape[1], 1))
+            out = max_pool(f_out)
+            out = out.squeeze()
+            return out
 
 
 if __name__ == '__main__':
     batch_size = 4
     input = torch.rand(batch_size, 128, 41)
-    print(input.type())
-    model = FreqNet(4)
-    model_dict = model.state_dict()
+    model = AutoEncoder('my', 4)
+    out = model(input)
+    # model_dict = model.state_dict()
     # for layer, param in model_dict.items():
     #     print("layers:" + layer)
     #     print(param)
     # param = model.named_parameters()
     # print(model_dict)
-    total_param = 0
-    for index, (name, param) in enumerate(model.named_parameters()):
-        print(str(index) + " " + name + 'size:' + str(param.size()) + 'param:' + str(param.numel()))
-        total_param += param.numel()
-    print('total param: {}'.format(total_param))
-    out = model(input)
+    # total_param = 0
+    # for index, (name, param) in enumerate(model.named_parameters()):
+    #     print(str(index) + " " + name + 'size:' + str(param.size()) + 'param:' + str(param.numel()))
+    #     total_param += param.numel()
+    # print('total param: {}'.format(total_param))
     print('input size:', input.size())
     print('output size', out.size())

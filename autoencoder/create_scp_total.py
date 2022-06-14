@@ -38,7 +38,6 @@ def dataset_cut(scp_path, wave_dir, channel, val_rate):
         lines = f.readlines()
     files_scp = [line.strip() for line in lines]
     # select 400 person to test the code
-    files_scp = files_scp[:400]
     nums_vl = int(len(files_scp) * val_rate)
     nums_tr = len(files_scp) - nums_vl
     a = np.arange(0, len(files_scp), 1)
@@ -69,7 +68,8 @@ def dataset_cut(scp_path, wave_dir, channel, val_rate):
 if __name__ == '__main__':
     # data_root = r'F:\OESense\data\Gesture Recognition'
     persons = [i for i in range(3, 32) if i != 6]
-    total_data(persons, 'total_dir')
+    # total_data(persons, 'total_dir')
+    total_data([1], 'total_dir')
     scp_path = r'F:\OESense\autoencoder\total_dir\total_data'
     dataset_cut(scp_path, 'total_dir', 2, 0.1)
 
