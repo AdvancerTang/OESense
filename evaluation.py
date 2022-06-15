@@ -70,7 +70,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--person', default=4, type=int, help='choose test person')
+    parser.add_argument('--person', default=1, type=int, help='choose test person')
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
     parser.add_argument('--label', default=4, type=int, help='number of gestures')
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')

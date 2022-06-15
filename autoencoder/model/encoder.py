@@ -35,9 +35,14 @@ class AutoEncoder(nn.Module):
                                     nn.LeakyReLU(inplace=True)
                                     )
 
-        # self.stack_rnn = nn.GRU(input_size=15, hidden_size=15, num_layers=1,
-        #                         bidirectional=True)
-        # self.ln = nn.LayerNorm(30)
+        self.stack_rnn = nn.GRU(input_size=15, hidden_size=15, num_layers=1,
+                                bidirectional=True)
+        self.ln = nn.LayerNorm(30)
+
+        self.fc_f0 = nn.Sequential(
+            nn.Linear(30, 15),
+            nn.LeakyReLU(inplace=True)
+        )
 
         self.fc_f1 = nn.Sequential(
             nn.Linear(15, 8),
@@ -86,9 +91,10 @@ class AutoEncoder(nn.Module):
             # C * T * F
             cnn_out = cnn_out.permute(0, 2, 1)
 
-            # t_out, _ = self.stack_rnn(cnn_out)
-            # t_out = self.ln(t_out)
-            t_out = self.fc_f1(cnn_out)
+            t_out, _ = self.stack_rnn(cnn_out)
+            t_out = self.ln(t_out)
+            t_out = self.fc_f0(t_out)
+            t_out = self.fc_f1(t_out)
             t_out = self.fc_f2(t_out)
             # t_out = self.fc_f3(t_out)
             f_out = t_out.permute(0, 2, 1)

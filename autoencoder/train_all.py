@@ -148,10 +148,10 @@ def main(args):
         train_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
         val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
     elif mode == 'total':
-        # train_path = r'F:\OESense\autoencoder\total_dir\data_train_1'
-        # val_path = r'F:\OESense\autoencoder\total_dir\data_val_1'
-        train_path = r'F:\OESense\total_dir\data_train_1'
-        val_path = r'F:\OESense\total_dir\data_val_1'
+        train_path = r'F:\OESense\autoencoder\total_dir\data_train_1'
+        val_path = r'F:\OESense\autoencoder\total_dir\data_val_1'
+        # train_path = r'F:\OESense\total_dir\data_train_1'
+        # val_path = r'F:\OESense\total_dir\data_val_1'
 
     # define dataloader
     print('loading the dataset...')

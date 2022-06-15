@@ -21,6 +21,7 @@ from warnings import simplefilter
 
 simplefilter(action='ignore', category=FutureWarning)
 
+
 def freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, trained_model, label):
     # def freq_frature_train(tr_feature, tr_label, vl_feature, vl_label, iters, lr, device, feature, label):
 
@@ -31,15 +32,16 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, 
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
-    # frozen parameters
-    # for p in model.parameters():
-    #     p.requires_grad = False
-    # update parameters
-    # for layer in [model.fc_f1, model.fc_f2]:
-    #     for p in layer.parameters():
-    #         p.requires_grad = True
-    params_non_frozen = filter(lambda p: p.requires_grad, model.parameters())
 
+    # frozen parameters
+    for p in model.parameters():
+        p.requires_grad = False
+    # update parameters
+    for layer in [model.stack_rnn, model.fc_f0, model.fc_f1, model.fc_f2]:
+        # for layer in [model.fc_f1, model.fc_f2]:
+        for p in layer.parameters():
+            p.requires_grad = True
+    params_non_frozen = filter(lambda p: p.requires_grad, model.parameters())
 
     model_path = 'my_model'
     numBatch_tr = len(dataloader_train)
@@ -47,8 +49,8 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, 
     total_num = numBatch_tr + numBatch_evl
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     criterion = nn.CrossEntropyLoss()
-    # optimizer = Adam(params_non_frozen, lr=lr)
-    optimizer = Adam(model.parameters(), lr=lr)
+    optimizer = Adam(params_non_frozen, lr=lr)
+    # optimizer = Adam(model.parameters(), lr=lr)
     model = model.to(device)
 
     writer = SummaryWriter('logs')
@@ -180,7 +182,8 @@ def main(args):
     print('-{} training batch, {} training batch'.format(len(dataloader_train), len(dataloader_val)))
 
     # train
-    max_recall, max_iter = freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, trained_model, label)
+    max_recall, max_iter = freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, trained_model,
+                                              label)
     print('max recall: {}, max iter: {}'.format(max_recall, max_iter))
 
 
@@ -199,6 +202,6 @@ if __name__ == '__main__':
     parser.add_argument('--device', default='cpu', type=str)
     parser.add_argument('--train_num_workers', default=2, type=int, help='number of train worker')
     parser.add_argument('--val_num_workers', default=1, type=int, help='number of validation worker')
-    parser.add_argument('--trained_model', default='./encoder_model/FreqNet_24.model', type=str)
+    parser.add_argument('--trained_model', default='./encoder_model/FreqNet_26.model', type=str)
     args = parser.parse_args()
     main(args)

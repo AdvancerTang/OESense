@@ -79,6 +79,6 @@ if __name__ == '__main__':
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
-    parser.add_argument('--trained_model', default='./my_model/FreqNet_23.model', type=str)
+    parser.add_argument('--trained_model', default='./my_model/FreqNet_32.model', type=str)
     args = parser.parse_args()
     main(args)

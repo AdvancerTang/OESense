@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # data_root = r'F:\OESense\data\Gesture Recognition'
     persons = [i for i in range(3, 32) if i != 6]
     # total_data(persons, 'total_dir')
-    total_data([1], 'total_dir')
+    total_data(persons, 'total_dir')
     scp_path = r'F:\OESense\autoencoder\total_dir\total_data'
-    dataset_cut(scp_path, 'total_dir', 2, 0.1)
+    dataset_cut(scp_path, 'total_dir', 1, 0.1)
 
