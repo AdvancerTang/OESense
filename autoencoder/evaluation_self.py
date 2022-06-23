@@ -1,9 +1,12 @@
 import os.path
 
+import matplotlib.pyplot as plt
+import pandas as pd
 import torch
 import torch.nn as nn
 from data_reader import myDataset, myDataloader
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
 import numpy as np
 import argparse
 
@@ -24,8 +27,12 @@ def main(args):
 
 
     # file path
-    val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
-    # val_path = r'F:\OESense\total_dir\data_val_2'
+    # clean
+    val_path = r'F:\OESense\autoencoder\wave_dir\data_1_val_1'
+    # gesture
+    # val_path = r'F:\OESense\wave_dir\data_1_val_1'
+    # act
+    # val_path = r'F:\OESense\wave_dir\data_{}_val_1_act'.format(person)
     # define dataloader
     print('loading the dataset...')
     dataset_val = myDataset(val_path, channel, feature)
@@ -67,7 +74,15 @@ def main(args):
         result = res['macro avg']
         recall = result['recall']
         max_recall = max(max_recall, recall)
-    print('recall : % .3f' % max_recall)
+        print('recall : % .3f' % max_recall)
+        print(result)
+
+        cm = confusion_matrix(yLabel, yPre)
+        cm = pd.DataFrame(cm, columns=['left', 'right', 'up', 'down'], index=['left', 'right', 'up', 'down'])
+        plt.Figure(figsize=(4, 4))
+        sns.heatmap(cm, cmap="YlGnBu_r", fmt="d", annot=True)
+        plt.show()
+
 
 
 if __name__ == '__main__':
@@ -79,6 +94,6 @@ if __name__ == '__main__':
     parser.add_argument('--feature', default='mel', type=str, help='choose time, stft, mel')
     parser.add_argument('--batchsize_val', default=1, type=int)
     parser.add_argument('--iters', default=25, type=int)
-    parser.add_argument('--trained_model', default='./my_model/FreqNet_32.model', type=str)
+    parser.add_argument('--trained_model', default=r'F:\OESense\autoencoder\my_model\FreqNet_146.model', type=str)
     args = parser.parse_args()
     main(args)

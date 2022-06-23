@@ -37,8 +37,8 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, 
     for p in model.parameters():
         p.requires_grad = False
     # update parameters
-    for layer in [model.stack_rnn, model.fc_f0, model.fc_f1, model.fc_f2]:
-        # for layer in [model.fc_f1, model.fc_f2]:
+    for layer in [model.fc_f1, model.fc_f2, model.fc_f3]:
+        # for layer in [model.fc_f1, model.fc_f2]:c
         for p in layer.parameters():
             p.requires_grad = True
     params_non_frozen = filter(lambda p: p.requires_grad, model.parameters())
@@ -125,12 +125,13 @@ def freq_frature_train(dataloader_train, dataloader_val, iters, lr, train_mode, 
 
             yPre = np.squeeze(np.array(yPre))
             yLabel = np.squeeze(np.array(yLabel))
-            res = classification_report(yPre, yLabel, output_dict=True, zero_division=0)
+            res = classification_report(yLabel, yPre, output_dict=True, zero_division=0)
             result = res['macro avg']
             recall = result['recall']
             print('recall = {:.3f}'.format(recall))
             print(result)
             writer.add_scalar('recall', recall, iter_)
+            # writer.add_graph(model, feature_evl)
             torch.save(model.state_dict(), os.path.join(model_path, '{}_{}.model'.format('FreqNet', iter_)))
             cur_recall = recall
             max_recall = max(max_recall, cur_recall)
@@ -156,11 +157,20 @@ def main(args):
     train_mode = args.train_mode
 
     # file path
-    # train_path = r'F:\OESense\wave_dir\data_train_1'
-    # val_path = r'F:\OESense\wave_dir\data_val_1'
+
+
     if mode == 'solo':
-        train_path = r'F:\OESense\autoencoder\wave_dir\data_{}_train_1'.format(person)
-        val_path = r'F:\OESense\autoencoder\wave_dir\data_{}_val_1'.format(person)
+        # clean
+        # train_path = r'F:\OESense\autoencoder\wave_dir\data_{}_train_1'.format(person)
+        # val_path = r'F:\OESense\autoencoder\wave_dir\data_{}_val_1'.format(person)
+
+        # gesture
+        train_path = r'F:\OESense\wave_dir\data_{}_train_1'.format(person)
+        val_path = r'F:\OESense\wave_dir\data_{}_val_1'.format(person)
+
+        # act
+        # train_path = r'F:\OESense\wave_dir\data_{}_train_1_act'.format(person)
+        # val_path = r'F:\OESense\wave_dir\data_{}_val_1_act'.format(person)
     elif mode == 'total':
         train_path = r'F:\OESense\autoencoder\total_dir\data_train_2'
         val_path = r'F:\OESense\autoencoder\total_dir\data_val_2'
@@ -197,11 +207,12 @@ if __name__ == '__main__':
     parser.add_argument('--channel', default=0, type=int, help='choose channel')
     parser.add_argument('--batchsize_train', default=16, type=int)
     parser.add_argument('--batchsize_val', default=1, type=int)
-    parser.add_argument('--iters', default=25, type=int)
+    parser.add_argument('--iters', default=150, type=int)
+
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--device', default='cpu', type=str)
     parser.add_argument('--train_num_workers', default=2, type=int, help='number of train worker')
     parser.add_argument('--val_num_workers', default=1, type=int, help='number of validation worker')
-    parser.add_argument('--trained_model', default='./encoder_model/FreqNet_26.model', type=str)
+    parser.add_argument('--trained_model', default='./encoder_model/FreqNet_3.model', type=str)
     args = parser.parse_args()
     main(args)

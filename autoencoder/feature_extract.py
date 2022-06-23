@@ -32,7 +32,8 @@ def peakDetection(audio, fs):
     peak_value = []
     audio_pitch = []
     period = fs
-    pitch = int(len(audio) / period)
+    # pitch = int(len(audio) / period)
+    pitch = 22
     for i in range(pitch):
         idx = period * i + np.argmax(filtered_envelop[i * period: (i + 1) * period])
         begin = idx - 0.25 * fs

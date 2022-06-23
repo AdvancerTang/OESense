@@ -92,11 +92,11 @@ class time_featureExtract(object):
 
 if __name__ == '__main__':
     data_path = r"F:\OESense\data\Person1"
-    data_name = 'S1_Ges_1-0-0.wav'
+    data_name = 'S1_Ges_11-0-16.wav'
     audio, fs = sf.read(os.path.join(data_path, data_name))
     plt.figure(1)
     plt.plot(audio)
-    plt.title('original signal ')
+    plt.title('right temple')
     # channel_l = audio[:, 0]
     # channel_r = audio[:, 1]
     # audio_pitch = peakDetection(channel_l, fs)
