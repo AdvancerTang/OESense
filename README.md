@@ -1,5 +1,5 @@
 # OESense
-&nbsp;Since the current push-type and knock-type wireless Stereo control methods are insensitive and inconvenient, this project adopts gesture control to solve these problems.The control of in-ear headphones is based on closed-ear effect, making it more beneficial to users.
+&nbsp;Since the current push-type and knock-type wireless Stereo control methods are insensitive and inconvenient, this project adopts gesture control to solve these problems.The control of in-ear headphones is based on  occlusion effect for in-ear human sensing, which make it more beneficial to users.
 ## Class
   The classes are simplified as follows:
 
