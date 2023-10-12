@@ -1,6 +1,7 @@
 # OESense
+&nbsp;Since the current push-type and knock-type wireless Stereo control methods are insensitive and inconvenient, this project adopts gesture control to solve these problems.The control of in-ear headphones is based on closed-ear effect, making it more beneficial to users.
 ## Class
-  The class is simplified as 4class:
+  The classes are simplified as follows:
 
   _class1_ including[left forehead/left temple/left cheek/left jaw];  
 
@@ -11,10 +12,10 @@
   _class4_ including[middle forehead].
 
 ## Feature
-The tested feature include time frequency, STFT spectrum(129), mel spectrogram(128), currentl, mel is the best
+The tested feature include time frequency, STFT spectrum(129), mel spectrogram(128), currently, mel is the best
 
 ## Data
-Compared with two channel feature, singal channel of channel[0] is better,we use the data of channel[0] and channel[1] to enlarge the dataset.
+Compared with two channel feature, singal channel of channel[0] is better, we use the data of channel[0] and channel[1] to enlarge the dataset.
 
 Data name: S_[Person] _Ges_ [origin label] _ [new label] -[Channel]-[Noise type]-[pitch num]  exp:S10_Ges_1_1-1-c-9.wav
 
